@@ -24,7 +24,8 @@ Import it in your code:
 import "github.com/fnsne/irisslog"
 ```
 ## todos
-- [ ] `irisslog.New()`
+- [x] `irisslog.New()`
+- [ ] `irisslog.NewWithRecover()`
 - [ ] example
 - [ ] skip logging
 - [ ] custom fields
@@ -33,14 +34,46 @@ import "github.com/fnsne/irisslog"
 
 See the [example](_examples/example_1/main.go).
 
-todo: add the right example
+```go
+package main
 
-## Skip logging
+import (
+	"fmt"
+	"github.com/fnsne/irisslog"
+	"github.com/kataras/iris/v12"
+	"golang.org/x/exp/slog"
+	"os"
+	"time"
+)
 
-When you want to skip logging for specific path,
-please use `NewWithConfig`
+func main() {
 
+	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		AddSource:   true,
+		Level:       slog.LevelDebug,
+		ReplaceAttr: nil,
+	}))
 
-## Custom Zap fields
-Example for custom log request body, response request ID or log [Open Telemetry](https://opentelemetry.io/) TraceID.
+	slog.SetDefault(logger)
 
+	app := iris.New()
+	app.Use(irisslog.New(logger))
+
+	// Example ping request.
+	app.Get("/ping", func(ctx iris.Context) {
+		//can get logger from context that has trace id in it.
+		handlerLogger := irisslog.GetLogger(ctx)
+		handlerLogger.Info("info ping")
+		ctx.Text("pong " + fmt.Sprint(time.Now().Unix()))
+	})
+
+	// Example when panic happen.
+	app.Get("/panic", func(ctx iris.Context) {
+		panic("An unexpected error happen!")
+	})
+
+	// Listen and Server in 0.0.0.0:8080
+	app.Listen(":8081")
+
+}
+```
