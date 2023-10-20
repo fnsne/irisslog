@@ -1,6 +1,11 @@
-# slog
+# irisslog
 
 Alternative logging through [slog](https://pkg.go.dev/golang.org/x/exp/slog). A clone of https://github.com/iris-contrib/middleware 's zap.
+
+This middleware will log all http requests with slog.
+
+Current support go 1.20. So slog is `"golang.org/x/exp/slog"`
+
 
 ## Usage
 
